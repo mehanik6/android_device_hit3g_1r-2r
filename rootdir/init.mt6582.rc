@@ -4,8 +4,14 @@ import /init.modem.rc
 
 on early-init
     mount debugfs /sys/kernel/debug /sys/kernel/debug
-    write /sys/class/leds/lcd-backlight/trigger "backlight"
     setprop ro.mtk.hardware mt6582
+
+on charger
+    mount ext4 /emmc@android /system ro wait
+    start servicemanager
+
+    # disable USB
+    write /sys/devices/platform/mt_usb/cmode 0
 
 on init
     # See storage config details at http://source.android.com/tech/storage/
@@ -17,6 +23,9 @@ on init
 
     mkdir /protect_f 0771 system system
     mkdir /protect_s 0771 system system
+	
+	# By default, primary storage is physical
+    setprop ro.vold.primary_physical 1 
 
     # Change ION driver permission
     chmod 0666 /dev/ion
@@ -106,6 +115,11 @@ on post-fs
     chmod 0770 /system/etc/ril
     chmod 0444 /system/etc/ril/oper.lis
     setprop rild.nw.operlist /system/etc/ril/oper.lis
+	
+    service drvbd /system/bin/drvbd
+    class main
+    user system
+    group system
 
     # change sbchk permission before mounted as read-only
     chown system system /sbchk
@@ -934,9 +948,8 @@ service thermal_manager /system/bin/thermal_manager
     user root
     oneshot
 
-service charger /sbin/healthd -c
+service battery_charger /charger
     class charger
-    critical
     seclabel u:r:healthd:s0
 #
 # Connectivity related services (Begin)
