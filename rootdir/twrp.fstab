@@ -9,5 +9,3 @@
 /nvram                   emmc             /dev/nvram                                           flags=display="nvram";backup=1
 /uboot                    emmc             /dev/uboot                                            flags=display="uboot";backup=1
 /logo                       emmc             /dev/logo                                               flags=display="logo";backup=1
-/emmc           vfat            /emmc@fat                   flags=display="Phone Storage";settingsstorage
-
